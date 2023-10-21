@@ -71,8 +71,6 @@ class CargoRetrieveSerializer(serializers.ModelSerializer):
         )
 
     def get_trucks(self, obj):
-        if not hasattr(self, 'trucks_queryset'):
-            self.trucks_queryset = Truck.objects.select_related('location').only('number', 'location__lat', 'location__lng')
         location = (obj.pickup_location.lat, obj.pickup_location.lng)
         serialized = TruckDistanceSerializer(instance=self.trucks_queryset, many=True, context={'location': location})
         return serialized.data
@@ -104,7 +102,6 @@ class CargoListSerializer(serializers.ModelSerializer):
         closest_trucks_count = \
             sum(1 for truck in self.trucks_queryset if
                 distance(pickup_location, (truck['location__lat'], truck['location__lng'])).miles <= MAX_DISTANCE)
-                # distance(pickup_location, (truck.location.lat, truck.location.lng)).miles <= MAX_DISTANCE)
 
         return closest_trucks_count
 
